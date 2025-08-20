@@ -160,8 +160,8 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
 
     var state = State.DIVIDE
 
-    var leftSort: MergeSort? = null
-    var rightSort: MergeSort? = null
+    lateinit var leftSort: MergeSort
+    lateinit var rightSort: MergeSort
 
     var leftSorted = false
     var rightSorted = false
@@ -178,14 +178,11 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
             State.SORT_LEFT  -> stepSortLeft(callback)
             State.SORT_RIGHT -> stepSortRight(callback)
             State.MERGE      -> stepMerge(callback)
-            State.DONE       -> true
         }
     }
 
     private fun stepDivide(callback: (Int, Int) -> Unit): Boolean {
         if (sortSmall(callback)) {
-            state = State.DONE
-
             return true
         }
 
@@ -197,6 +194,8 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
         rightSort = MergeSort(numbers, rightRange)
 
         state = State.SORT_LEFT
+
+        stepSortLeft(callback)
 
         return false
     }
@@ -227,10 +226,10 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
     }
 
     private fun stepSortLeft(callback: (Int, Int) -> Unit): Boolean {
-        leftSorted = leftSort!!.stepSort(callback)
+        leftSorted = leftSort.stepSort(callback)
 
         if (leftSorted) {
-            mergeA = leftSort!!.first
+            mergeA = leftSort.first
             mergePos = mergeA
 
             state = State.SORT_RIGHT
@@ -240,10 +239,10 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
     }
 
     private fun stepSortRight(callback: (Int, Int) -> Unit): Boolean {
-        rightSorted = rightSort!!.stepSort(callback)
+        rightSorted = rightSort.stepSort(callback)
 
         if (rightSorted) {
-            mergeB = rightSort!!.first
+            mergeB = rightSort.first
 
             copyToAux()
 
@@ -260,15 +259,13 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
     }
 
     private fun stepMerge(callback: (Int, Int) -> Unit): Boolean {
-        callback(mergeA, mergeB)
-
-        if (mergeA > leftSort!!.last && mergeB > rightSort!!.last) {
-            state = State.DONE
+        if (mergeA > leftSort.last && mergeB > rightSort.last) {
+            return true
         }
-        else if (mergeA <= leftSort!!.last && mergeB > rightSort!!.last) {
+        else if (mergeA <= leftSort.last && mergeB > rightSort.last) {
             numbers[mergePos++] = aux[mergeA++]
         }
-        else if (mergeA > leftSort!!.last && mergeB <= rightSort!!.last) {
+        else if (mergeA > leftSort.last && mergeB <= rightSort.last) {
             numbers[mergePos++] = aux[mergeB++]
         }
         else if (aux[mergeA] < aux[mergeB]) {
@@ -277,6 +274,8 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
         else {
             numbers[mergePos++] = aux[mergeB++]
         }
+
+        callback(mergeA, mergeB)
 
         return false
     }
@@ -294,8 +293,7 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
         DIVIDE,
         SORT_LEFT,
         SORT_RIGHT,
-        MERGE,
-        DONE
+        MERGE
     }
 }
 

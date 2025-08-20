@@ -2,7 +2,7 @@ package kakkoiichris.sortvisualizer
 
 fun main(args: Array<String>) {
     var algorithm = Algorithm.MERGE
-    var count = 128
+    var count = 100
     var width = 1000
     var height = width / 16 * 10
     var border = 10

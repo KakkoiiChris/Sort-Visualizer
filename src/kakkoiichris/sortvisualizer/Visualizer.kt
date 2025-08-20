@@ -24,7 +24,7 @@ class Visualizer(
 
     private val algorithm = algorithm(numbers)
 
-    private val speed = 1.0 / 100
+    private val speed = 1.0 / 10
     private var sortTimer = 0.0
 
     private var swapA = 0

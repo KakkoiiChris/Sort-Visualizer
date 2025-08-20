@@ -2,6 +2,7 @@ package kakkoiichris.sortvisualizer
 
 import kakkoiichris.hypergame.Game
 import kakkoiichris.hypergame.input.Input
+import kakkoiichris.hypergame.input.Key
 import kakkoiichris.hypergame.media.Renderer
 import kakkoiichris.hypergame.state.StateManager
 import kakkoiichris.hypergame.util.Time
@@ -23,7 +24,7 @@ class Visualizer(
 
     private val algorithm = algorithm(numbers)
 
-    private val speed = 1.0 / 50
+    private val speed = 1.0 / 100
     private var sortTimer = 0.0
 
     private var swapA = 0

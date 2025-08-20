@@ -15,7 +15,7 @@ enum class Algorithm(val getter: (IntArray, IntRange) -> SortingAlgorithm) {
 }
 
 sealed class SortingAlgorithm(val numbers: IntArray, val range: IntRange = numbers.indices) {
-    val sortSize get() = range.endInclusive - range.start + 1
+    val sortSize get() = range.last - range.first + 1
 
     abstract val isSorted: Boolean
 
@@ -26,7 +26,7 @@ class BubbleSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorting
     private var pos = range.first
     private var top = range.last
 
-    override val isSorted get() = top == range.start
+    override val isSorted get() = top == range.first
 
     override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
         callback(pos, pos + 1)
@@ -43,7 +43,7 @@ class BubbleSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorting
 
         if (pos == top) {
             top--
-            pos = range.start
+            pos = range.first
         }
 
         return true
@@ -153,47 +153,62 @@ class SelectionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
 }
 
 class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+    val aux = IntArray(numbers.size)
+
+    val first get() = range.first
+    val last get() = range.last
+
+    var state = State.DIVIDE
+
     var leftSort: MergeSort? = null
     var rightSort: MergeSort? = null
 
     var leftSorted = false
     var rightSorted = false
 
-    override val isSorted get() = leftSorted && rightSorted
+    var mergePos = 0
+    var mergeA = 0
+    var mergeB = 0
+
+    override val isSorted get() = mergePos == last
 
     override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
-        if (isSorted) return true
-
-        if (leftSort != null) {
-            leftSorted = leftSort!!.stepSort(callback)
-
-            if (leftSorted) leftSort = null
-
-            return false
+        return when (state) {
+            State.DIVIDE     -> stepDivide(callback)
+            State.SORT_LEFT  -> stepSortLeft(callback)
+            State.SORT_RIGHT -> stepSortRight(callback)
+            State.MERGE      -> stepMerge(callback)
+            State.DONE       -> true
         }
+    }
 
-        if (rightSort != null) {
-            rightSorted = rightSort!!.stepSort(callback)
-
-            if (rightSorted) rightSort = null
-
-            return false
-        }
-
-        if (sortSize == 1) {
-            println("$range: 1")
-
-            leftSorted = true
-            rightSorted = true
+    private fun stepDivide(callback: (Int, Int) -> Unit): Boolean {
+        if (sortSmall(callback)) {
+            state = State.DONE
 
             return true
         }
 
-        if (sortSize == 2) {
-            println("$range: 2")
+        val (leftRange, rightRange) = range.divide()
 
-            val a = range.start
-            val b = range.endInclusive
+        callback(leftRange.first, rightRange.first)
+
+        leftSort = MergeSort(numbers, leftRange)
+        rightSort = MergeSort(numbers, rightRange)
+
+        state = State.SORT_LEFT
+
+        return false
+    }
+
+    private fun sortSmall(callback: (Int, Int) -> Unit): Boolean {
+        if (sortSize == 1) {
+            return true
+        }
+
+        if (sortSize == 2) {
+            val a = first
+            val b = last
 
             callback(a, b)
 
@@ -205,29 +220,82 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
                 numbers[b] = numA
             }
 
-            leftSorted = true
-            rightSorted = true
-
             return true
         }
-
-        println("$range: DIVIDE")
-
-        val (leftRange, rightRange) = range.divide()
-
-        leftSort = MergeSort(numbers, leftRange)
-        rightSort = MergeSort(numbers, rightRange)
 
         return false
     }
 
-    private fun IntRange.divide():Pair<IntRange, IntRange>{
+    private fun stepSortLeft(callback: (Int, Int) -> Unit): Boolean {
+        leftSorted = leftSort!!.stepSort(callback)
+
+        if (leftSorted) {
+            mergeA = leftSort!!.first
+            mergePos = mergeA
+
+            state = State.SORT_RIGHT
+        }
+
+        return false
+    }
+
+    private fun stepSortRight(callback: (Int, Int) -> Unit): Boolean {
+        rightSorted = rightSort!!.stepSort(callback)
+
+        if (rightSorted) {
+            mergeB = rightSort!!.first
+
+            copyToAux()
+
+            state = State.MERGE
+        }
+
+        return false
+    }
+
+    private fun copyToAux() {
+        for (i in range) {
+            aux[i] = numbers[i]
+        }
+    }
+
+    private fun stepMerge(callback: (Int, Int) -> Unit): Boolean {
+        callback(mergeA, mergeB)
+
+        if (mergeA > leftSort!!.last && mergeB > rightSort!!.last) {
+            state = State.DONE
+        }
+        else if (mergeA <= leftSort!!.last && mergeB > rightSort!!.last) {
+            numbers[mergePos++] = aux[mergeA++]
+        }
+        else if (mergeA > leftSort!!.last && mergeB <= rightSort!!.last) {
+            numbers[mergePos++] = aux[mergeB++]
+        }
+        else if (aux[mergeA] < aux[mergeB]) {
+            numbers[mergePos++] = aux[mergeA++]
+        }
+        else {
+            numbers[mergePos++] = aux[mergeB++]
+        }
+
+        return false
+    }
+
+    private fun IntRange.divide(): Pair<IntRange, IntRange> {
         val middle = (endInclusive + start) / 2
 
         val leftRange = start..middle
         val rightRange = (middle + 1)..endInclusive
 
         return leftRange to rightRange
+    }
+
+    enum class State {
+        DIVIDE,
+        SORT_LEFT,
+        SORT_RIGHT,
+        MERGE,
+        DONE
     }
 }
 

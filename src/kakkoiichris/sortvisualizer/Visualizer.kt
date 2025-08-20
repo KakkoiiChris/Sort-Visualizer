@@ -1,5 +1,6 @@
 package kakkoiichris.sortvisualizer
 
+import kakkoiichris.hypergame.Game
 import kakkoiichris.hypergame.input.Input
 import kakkoiichris.hypergame.media.Renderer
 import kakkoiichris.hypergame.state.StateManager
@@ -36,13 +37,13 @@ class Visualizer(
         }
     }
 
-    override fun swapTo(view: View) {
+    override fun swapTo(view: View, game: Game) {
     }
 
-    override fun swapFrom(view: View) {
+    override fun swapFrom(view: View, game: Game) {
     }
 
-    override fun update(view: View, manager: StateManager, time: Time, input: Input) {
+    override fun update(view: View, game: Game, time: Time, input: Input) {
         if (algorithm.isSorted || numbers.isSorted) return
 
         sortTimer += time.seconds
@@ -61,7 +62,7 @@ class Visualizer(
         }
     }
 
-    override fun render(view: View, renderer: Renderer) {
+    override fun render(view: View, game: Game, renderer: Renderer) {
         renderer.clearRect(view.bounds)
 
         val barWidthDelta = width / numbers.size.toDouble()
@@ -95,6 +96,6 @@ class Visualizer(
         renderer.pop()
     }
 
-    override fun halt(view: View) {
+    override fun halt(view: View, game: Game) {
     }
 }

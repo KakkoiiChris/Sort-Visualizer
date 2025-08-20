@@ -181,10 +181,17 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
         }
 
         if (sortSize == 1) {
+            println("$range: 1")
+
+            leftSorted = true
+            rightSorted = true
+
             return true
         }
 
         if (sortSize == 2) {
+            println("$range: 2")
+
             val a = range.start
             val b = range.endInclusive
 
@@ -194,22 +201,33 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
             val numB = numbers[b]
 
             if (numA > numB) {
-                numbers[a] = numA
-                numbers[b] = numB
+                numbers[a] = numB
+                numbers[b] = numA
             }
+
+            leftSorted = true
+            rightSorted = true
 
             return true
         }
 
-        val middle = (range.endInclusive - range.start) / 2
+        println("$range: DIVIDE")
 
-        val leftRange = range.start..middle
-        val rightRange = (middle + 1)..range.endInclusive
+        val (leftRange, rightRange) = range.divide()
 
         leftSort = MergeSort(numbers, leftRange)
         rightSort = MergeSort(numbers, rightRange)
 
         return false
+    }
+
+    private fun IntRange.divide():Pair<IntRange, IntRange>{
+        val middle = (endInclusive + start) / 2
+
+        val leftRange = start..middle
+        val rightRange = (middle + 1)..endInclusive
+
+        return leftRange to rightRange
     }
 }
 

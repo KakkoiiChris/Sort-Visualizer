@@ -7,16 +7,19 @@ enum class Algorithm(val getter: (IntArray, IntRange) -> SortingAlgorithm) {
     COCKTAIL({ numbers, range -> CocktailSort(numbers, range) }),
     INSERTION({ numbers, range -> InsertionSort(numbers, range) }),
     SELECTION({ numbers, range -> SelectionSort(numbers, range) }),
+    MERGE({ numbers, range -> MergeSort(numbers, range) }),
     BOGO({ numbers, range -> BogoSort(numbers, range) });
 
-    operator fun invoke(numbers: IntArray, range: IntRange) =
+    operator fun invoke(numbers: IntArray, range: IntRange = numbers.indices) =
         getter(numbers, range)
 }
 
 sealed class SortingAlgorithm(val numbers: IntArray, val range: IntRange = numbers.indices) {
+    val sortSize get() = range.endInclusive - range.start + 1
+
     abstract val isSorted: Boolean
 
-    abstract fun stepSort(callback: (Int, Int) -> Unit)
+    abstract fun stepSort(callback: (Int, Int) -> Unit): Boolean
 }
 
 class BubbleSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
@@ -25,7 +28,7 @@ class BubbleSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorting
 
     override val isSorted get() = top == range.start
 
-    override fun stepSort(callback: (Int, Int) -> Unit) {
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
         callback(pos, pos + 1)
 
         val a = numbers[pos]
@@ -42,6 +45,8 @@ class BubbleSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorting
             top--
             pos = range.start
         }
+
+        return true
     }
 }
 
@@ -53,7 +58,7 @@ class CocktailSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorti
 
     override val isSorted get() = bottom >= top
 
-    override fun stepSort(callback: (Int, Int) -> Unit) {
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
         callback(pos, pos + 1)
 
         val a = numbers[pos]
@@ -78,6 +83,8 @@ class CocktailSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorti
             bottom++
             pos++
         }
+
+        return true
     }
 }
 
@@ -88,26 +95,28 @@ class InsertionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
 
     override val isSorted get() = i >= numbers.size
 
-    override fun stepSort(callback: (Int, Int) -> Unit) {
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
         callback(j, i)
 
         if (j >= 0 && numbers[j] > key) {
             numbers[j + 1] = numbers[j]
             j--
 
-            return
+            return true
         }
 
         numbers[j + 1] = key
 
-        if (i >= numbers.size) return
+        if (i >= numbers.size) return true
 
         i++
 
-        if (isSorted) return
+        if (isSorted) return false
 
         key = numbers[i]
         j = i - 1
+
+        return true
     }
 }
 
@@ -118,7 +127,7 @@ class SelectionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
 
     override val isSorted get() = first == numbers.size - 1
 
-    override fun stepSort(callback: (Int, Int) -> Unit) {
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
         callback(pos, min)
 
         if (pos == numbers.size) {
@@ -130,7 +139,7 @@ class SelectionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
             min = first
             pos = first + 1
 
-            return
+            return true
         }
 
         if (numbers[pos] < numbers[min]) {
@@ -138,16 +147,81 @@ class SelectionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
         }
 
         pos++
+
+        return true
+    }
+}
+
+class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+    var leftSort: MergeSort? = null
+    var rightSort: MergeSort? = null
+
+    var leftSorted = false
+    var rightSorted = false
+
+    override val isSorted get() = leftSorted && rightSorted
+
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
+        if (isSorted) return true
+
+        if (leftSort != null) {
+            leftSorted = leftSort!!.stepSort(callback)
+
+            if (leftSorted) leftSort = null
+
+            return false
+        }
+
+        if (rightSort != null) {
+            rightSorted = rightSort!!.stepSort(callback)
+
+            if (rightSorted) rightSort = null
+
+            return false
+        }
+
+        if (sortSize == 1) {
+            return true
+        }
+
+        if (sortSize == 2) {
+            val a = range.start
+            val b = range.endInclusive
+
+            callback(a, b)
+
+            val numA = numbers[a]
+            val numB = numbers[b]
+
+            if (numA > numB) {
+                numbers[a] = numA
+                numbers[b] = numB
+            }
+
+            return true
+        }
+
+        val middle = (range.endInclusive - range.start) / 2
+
+        val leftRange = range.start..middle
+        val rightRange = (middle + 1)..range.endInclusive
+
+        leftSort = MergeSort(numbers, leftRange)
+        rightSort = MergeSort(numbers, rightRange)
+
+        return false
     }
 }
 
 class BogoSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
     override val isSorted get() = numbers.isSorted
 
-    override fun stepSort(callback: (Int, Int) -> Unit) {
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
         callback(Random.nextInt(numbers.size), Random.nextInt(numbers.size))
 
         numbers.shuffle()
+
+        return false
     }
 }
 

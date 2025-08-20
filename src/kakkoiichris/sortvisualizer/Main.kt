@@ -1,12 +1,12 @@
 package kakkoiichris.sortvisualizer
 
 fun main(args: Array<String>) {
-    var algorithm = Algorithm.BUBBLE
-    var count = 100
+    var algorithm = Algorithm.MERGE
+    var count = 128
     var width = 1000
     var height = width / 16 * 10
     var border = 10
-    var mode = Mode.REVERSE
+    var mode = Mode.SHUFFLE
 
     var i = 0
 

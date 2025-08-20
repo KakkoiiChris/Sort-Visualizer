@@ -20,7 +20,7 @@ class Visualizer(
 
     private val numbers = IntArray(count) { it + 1 }
 
-    private val algorithm = algorithm(numbers, 10..90)
+    private val algorithm = algorithm(numbers)
 
     private val speed = 1.0 / 50
     private var sortTimer = 0.0

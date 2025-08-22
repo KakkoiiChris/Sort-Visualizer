@@ -1,12 +1,14 @@
 package kakkoiichris.sortvisualizer
 
+import kakkoiichris.hypergame.view.Window
+
 fun main(args: Array<String>) {
-    var algorithm = Algorithm.MERGE
-    var count = 100
-    var width = 1000
-    var height = width / 16 * 10
+    var algorithm = Algorithm.INSERTION
+    var count = 16
+    var width = 500
+    var height = width
     var border = 10
-    var mode = Mode.SHUFFLE
+    var mode = Mode.REVERSE
 
     var i = 0
 
@@ -29,7 +31,9 @@ fun main(args: Array<String>) {
         }
     }
 
+    val window = Window<Visualizer>(width + (border * 2), height + (border * 2), title = "Sort Visualizer")
+
     val visualizer = Visualizer(width, height, border, algorithm, count, mode)
 
-    visualizer.open()
+    window.open(visualizer)
 }

@@ -98,7 +98,7 @@ class InsertionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
     override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
         callback(j, i)
 
-        if (j >= 0 && numbers[j] > key) {
+        if (j >= range.first && numbers[j] > key) {
             numbers[j + 1] = numbers[j]
             j--
 
@@ -201,22 +201,21 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
     }
 
     private fun sortSmall(callback: (Int, Int) -> Unit): Boolean {
+        callback(first, last)
+
         if (sortSize == 1) {
             return true
         }
 
         if (sortSize == 2) {
-            val a = first
-            val b = last
+            callback(first, last)
 
-            callback(a, b)
-
-            val numA = numbers[a]
-            val numB = numbers[b]
+            val numA = numbers[first]
+            val numB = numbers[last]
 
             if (numA > numB) {
-                numbers[a] = numB
-                numbers[b] = numA
+                numbers[first] = numB
+                numbers[last] = numA
             }
 
             return true
@@ -232,6 +231,8 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
             mergeA = leftSort.first
             mergePos = mergeA
 
+            callback(mergeA, mergeA)
+
             state = State.SORT_RIGHT
         }
 
@@ -243,6 +244,8 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
 
         if (rightSorted) {
             mergeB = rightSort.first
+
+            callback(mergeA, mergeB)
 
             copyToAux()
 
@@ -259,10 +262,9 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
     }
 
     private fun stepMerge(callback: (Int, Int) -> Unit): Boolean {
-        if (mergeA > leftSort.last && mergeB > rightSort.last) {
-            return true
-        }
-        else if (mergeA <= leftSort.last && mergeB > rightSort.last) {
+        callback(mergeA, mergeB)
+
+        if (mergeA <= leftSort.last && mergeB > rightSort.last) {
             numbers[mergePos++] = aux[mergeA++]
         }
         else if (mergeA > leftSort.last && mergeB <= rightSort.last) {
@@ -275,9 +277,7 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
             numbers[mergePos++] = aux[mergeB++]
         }
 
-        callback(mergeA, mergeB)
-
-        return false
+        return mergeA > leftSort.last && mergeB > rightSort.last
     }
 
     private fun IntRange.divide(): Pair<IntRange, IntRange> {

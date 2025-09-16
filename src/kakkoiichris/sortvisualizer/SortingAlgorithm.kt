@@ -93,28 +93,37 @@ class InsertionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
     private var j = i - 1
     private var key = numbers[i]
 
+    private var insertKey = true
+
     override val isSorted get() = i >= numbers.size
 
     override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
-        callback(j, i)
-
         if (j >= range.first && numbers[j] > key) {
             numbers[j + 1] = numbers[j]
             j--
 
+            callback(j, i)
+
+            insertKey = true
+
             return true
         }
 
-        numbers[j + 1] = key
+        if (insertKey) {
+            numbers[j + 1] = key
 
-        if (i >= numbers.size) return true
+            callback(j + 1, i)
+
+            insertKey = false
+
+            return true
+        }
 
         i++
-
-        if (isSorted) return false
-
         key = numbers[i]
         j = i - 1
+
+        callback(j, i)
 
         return true
     }
@@ -312,7 +321,7 @@ class BogoSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAl
 val IntArray.isSorted: Boolean
     get() {
         for (i in 1..<size) {
-            if (this[i] < this[i - 1]) return false
+            if (this[i] != this[i - 1] + 1) return false
         }
 
         return true

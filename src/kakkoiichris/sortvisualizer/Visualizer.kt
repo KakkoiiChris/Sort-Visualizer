@@ -19,9 +19,9 @@ class Visualizer(
 
     private val numbers = IntArray(count) { it + 1 }
 
-    private val algorithm = algorithm(numbers)
+    private lateinit var algorithm: SortingAlgorithm
 
-    private val speed = 1.0 / 1
+    private val speed = 1.0 / 1000
     private var sortTimer = 0.0
 
     private var swapA = 0
@@ -33,13 +33,15 @@ class Visualizer(
             Mode.REVERSE -> numbers.reverse()
             Mode.SORTED  -> Unit
         }
+
+        this.algorithm = algorithm(numbers)
     }
 
     override fun init(view: View<*>) {
     }
 
     override fun update(view: View<*>, time: Time, input: Input) {
-        if (numbers.isSorted) {
+        if (algorithm.numbers.isSorted) {
             swapA = -1
             swapB = -1
             return
@@ -55,7 +57,9 @@ class Visualizer(
 
             sortTimer -= speed
 
-            if (numbers.isSorted) break
+            if (algorithm.numbers.isSorted) {
+                break
+            }
         }
     }
 

@@ -4,11 +4,11 @@ import kakkoiichris.hypergame.view.Window
 
 fun main(args: Array<String>) {
     var algorithm = Algorithm.INSERTION
-    var count = 16
-    var width = 500
+    var count = 750
+    var width = 750
     var height = width
     var border = 10
-    var mode = Mode.REVERSE
+    var mode = Mode.SHUFFLE
 
     var i = 0
 

@@ -3,12 +3,13 @@ package kakkoiichris.sortvisualizer
 import kakkoiichris.hypergame.view.Window
 
 fun main(args: Array<String>) {
-    var algorithm = Algorithm.INSERTION
+    var algorithm = Algorithm.MERGE
     var count = 750
     var width = 750
     var height = width
     var border = 10
-    var mode = Mode.SHUFFLE
+    var mode = Mode.REVERSE
+    var speed = 1.0 / 60
 
     var i = 0
 
@@ -27,13 +28,15 @@ fun main(args: Array<String>) {
                 height = dimensions[1]
             }
 
-            "-S" -> mode = Mode.valueOf(args[i++].uppercase())
+            "-M" -> mode = Mode.valueOf(args[i++].uppercase())
+
+            "-S" -> speed = args[i++].toDouble()
         }
     }
 
     val window = Window<Visualizer>(width + (border * 2), height + (border * 2), title = "Sort Visualizer")
 
-    val visualizer = Visualizer(width, height, border, algorithm, count, mode)
+    val visualizer = Visualizer(width, height, border, algorithm, count, mode, speed)
 
     window.open(visualizer)
 }

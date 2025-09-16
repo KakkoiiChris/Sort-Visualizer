@@ -14,14 +14,14 @@ class Visualizer(
     val border: Int,
     algorithm: Algorithm,
     count: Int,
-    mode: Mode
+    mode: Mode,
+    val speed:Double
 ) : Game {
 
     private val numbers = IntArray(count) { it + 1 }
 
     private lateinit var algorithm: SortingAlgorithm
 
-    private val speed = 1.0 / 1000
     private var sortTimer = 0.0
 
     private var swapA = 0

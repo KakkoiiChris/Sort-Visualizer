@@ -8,6 +8,7 @@ enum class Algorithm(val getter: (IntArray, IntRange) -> SortingAlgorithm) {
     INSERTION({ numbers, range -> InsertionSort(numbers, range) }),
     SELECTION({ numbers, range -> SelectionSort(numbers, range) }),
     MERGE({ numbers, range -> MergeSort(numbers, range) }),
+    COMB({ numbers, range -> CombSort(numbers, range) }),
     BOGO({ numbers, range -> BogoSort(numbers, range) });
 
     operator fun invoke(numbers: IntArray, range: IntRange = numbers.indices) =
@@ -305,6 +306,69 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
         MERGE
     }
 }
+
+class CombSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+    private val shrinkFactor = 1.2
+
+    private var i = 0
+    private var gap = (numbers.size / shrinkFactor).toInt()
+
+    private val j get() = (i + gap).toInt()
+
+    override val isSorted get() = gap < 1
+
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
+        callback(i, j)
+
+        if (j > numbers.lastIndex) {
+            gap = (gap / shrinkFactor).toInt()
+
+            i = 0
+
+            return true
+        }
+
+        if (numbers[i] > numbers[j]) {
+            val t = numbers[i]
+            numbers[i] = numbers[j]
+            numbers[j] = t
+        }
+
+        i++
+
+        return true
+    }
+}
+
+/*class HeapSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+    override val isSorted: Boolean
+        get() = false
+
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
+
+    }
+
+    private val Int.left get() = this * 2
+    private val Int.right get() = (this * 2) + 1
+    private val Int.parent get() = (this - 1) / 2
+
+    private fun siftUp(end: Int): Int? {
+        if (end > 0) {
+            val parent = end.parent
+
+            if (numbers[parent] < numbers[end]) {
+                val t = numbers[parent]
+                numbers[parent] = numbers[end]
+                numbers[end] = t
+
+                end = parent
+            }
+            else return true
+        }
+
+        return false
+    }
+}*/
 
 class BogoSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
     override val isSorted get() = numbers.isSorted

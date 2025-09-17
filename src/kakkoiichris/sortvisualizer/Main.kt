@@ -3,13 +3,13 @@ package kakkoiichris.sortvisualizer
 import kakkoiichris.hypergame.view.Window
 
 fun main(args: Array<String>) {
-    var algorithm = Algorithm.MERGE
+    var algorithm = Algorithm.ODDEVEN
     var count = 750
     var width = 750
     var height = width
     var border = 10
-    var mode = Mode.REVERSE
-    var speed = 1.0 / 60
+    var mode = Mode.SHUFFLE
+    var speed = 1.0 / 30
 
     var i = 0
 

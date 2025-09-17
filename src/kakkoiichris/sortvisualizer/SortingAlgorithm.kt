@@ -2,20 +2,25 @@ package kakkoiichris.sortvisualizer
 
 import kotlin.random.Random
 
-enum class Algorithm(val getter: (IntArray, IntRange) -> SortingAlgorithm) {
-    BUBBLE({ numbers, range -> BubbleSort(numbers, range) }),
-    COCKTAIL({ numbers, range -> CocktailSort(numbers, range) }),
-    INSERTION({ numbers, range -> InsertionSort(numbers, range) }),
-    SELECTION({ numbers, range -> SelectionSort(numbers, range) }),
-    MERGE({ numbers, range -> MergeSort(numbers, range) }),
-    COMB({ numbers, range -> CombSort(numbers, range) }),
-    BOGO({ numbers, range -> BogoSort(numbers, range) });
+enum class Algorithm(val getter: (Visualizer, IntArray, IntRange) -> SortingAlgorithm) {
+    BUBBLE({ visualizer, numbers, range -> BubbleSort(visualizer, numbers, range) }),
+    COCKTAIL({ visualizer, numbers, range -> CocktailSort(visualizer, numbers, range) }),
+    INSERTION({ visualizer, numbers, range -> InsertionSort(visualizer, numbers, range) }),
+    SELECTION({ visualizer, numbers, range -> SelectionSort(visualizer, numbers, range) }),
+    MERGE({ visualizer, numbers, range -> MergeSort(visualizer, numbers, range) }),
+    COMB({ visualizer, numbers, range -> CombSort(visualizer, numbers, range) }),
+    ODDEVEN({ visualizer, numbers, range -> OddEvenSort(visualizer, numbers, range) }),
+    BOGO({ visualizer, numbers, range -> BogoSort(visualizer, numbers, range) });
 
-    operator fun invoke(numbers: IntArray, range: IntRange = numbers.indices) =
-        getter(numbers, range)
+    operator fun invoke(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) =
+        getter(visualizer, numbers, range)
 }
 
-sealed class SortingAlgorithm(val numbers: IntArray, val range: IntRange = numbers.indices) {
+sealed class SortingAlgorithm(
+    val visualizer: Visualizer,
+    val numbers: IntArray,
+    val range: IntRange = numbers.indices
+) {
     val sortSize get() = range.last - range.first + 1
 
     abstract val isSorted: Boolean
@@ -23,7 +28,8 @@ sealed class SortingAlgorithm(val numbers: IntArray, val range: IntRange = numbe
     abstract fun stepSort(callback: (Int, Int) -> Unit): Boolean
 }
 
-class BubbleSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class BubbleSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
     private var pos = range.first
     private var top = range.last
 
@@ -51,7 +57,8 @@ class BubbleSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorting
     }
 }
 
-class CocktailSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class CocktailSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
     private var pos = 0
     private var dir = 1
     private var bottom = 0
@@ -89,7 +96,8 @@ class CocktailSort(numbers: IntArray, range: IntRange = numbers.indices) : Sorti
     }
 }
 
-class InsertionSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class InsertionSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
     private var i = 1
     private var j = i - 1
     private var key = numbers[i]
@@ -130,7 +138,8 @@ class InsertionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
     }
 }
 
-class SelectionSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class SelectionSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
     private var first = 0
     private var min = first
     private var pos = first + 1
@@ -162,7 +171,8 @@ class SelectionSort(numbers: IntArray, range: IntRange = numbers.indices) : Sort
     }
 }
 
-class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class MergeSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
     val aux = IntArray(numbers.size)
 
     val first get() = range.first
@@ -200,8 +210,8 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
 
         callback(leftRange.first, rightRange.first)
 
-        leftSort = MergeSort(numbers, leftRange)
-        rightSort = MergeSort(numbers, rightRange)
+        leftSort = MergeSort(visualizer, numbers, leftRange)
+        rightSort = MergeSort(visualizer, numbers, rightRange)
 
         state = State.SORT_LEFT
 
@@ -307,7 +317,8 @@ class MergeSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingA
     }
 }
 
-class CombSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class CombSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
     private val shrinkFactor = 1.2
 
     private var i = 0
@@ -340,7 +351,35 @@ class CombSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAl
     }
 }
 
-/*class HeapSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class OddEvenSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
+    private var odd = false
+
+    override val isSorted: Boolean
+        get() = false
+
+    override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
+        var i = if (odd) 1 else 0
+
+        while (i < numbers.lastIndex) {
+            val j = i + 1
+
+            if (numbers[i] > numbers[j]) {
+                val t = numbers[i]
+                numbers[i] = numbers[j]
+                numbers[j] = t
+            }
+
+            i += 2
+        }
+
+        odd = !odd
+
+        return true
+    }
+}
+
+/*class HeapSort(visualizer: Visualizer, numbers:IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(visualizer, numbers, range) {
     override val isSorted: Boolean
         get() = false
 
@@ -370,7 +409,8 @@ class CombSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAl
     }
 }*/
 
-class BogoSort(numbers: IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(numbers, range) {
+class BogoSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
     override val isSorted get() = numbers.isSorted
 
     override fun stepSort(callback: (Int, Int) -> Unit): Boolean {

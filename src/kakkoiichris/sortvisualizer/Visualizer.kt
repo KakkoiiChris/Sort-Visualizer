@@ -15,12 +15,12 @@ class Visualizer(
     algorithm: Algorithm,
     count: Int,
     mode: Mode,
-    val speed:Double
+    val speed: Double
 ) : Game {
 
     private val numbers = IntArray(count) { it + 1 }
 
-    private lateinit var algorithm: SortingAlgorithm
+    private val algorithm: SortingAlgorithm
 
     private var sortTimer = 0.0
 
@@ -34,7 +34,7 @@ class Visualizer(
             Mode.SORTED  -> Unit
         }
 
-        this.algorithm = algorithm(numbers)
+        this.algorithm = algorithm(this, numbers)
     }
 
     override fun init(view: View<*>) {
@@ -78,10 +78,10 @@ class Visualizer(
 
         for ((i, num) in numbers.withIndex()) {
             renderer.color = when (i) {
-                swapA   -> Color.red
-                swapB   -> Color.blue
-                num - 1 -> Color.green
-                else    -> Color.white
+                swapA   -> Color(127, 0, 0)
+                swapB   -> Color(0, 0, 127)
+                num - 1 -> Color(0, 127, 0)
+                else    -> Color(127, 127, 127)
             }
 
             renderer.fillRect(

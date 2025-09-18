@@ -2,15 +2,15 @@ package kakkoiichris.sortvisualizer
 
 import kotlin.random.Random
 
-enum class Algorithm(val getter: (Visualizer, IntArray, IntRange) -> SortingAlgorithm) {
-    BUBBLE({ visualizer, numbers, range -> BubbleSort(visualizer, numbers, range) }),
-    COCKTAIL({ visualizer, numbers, range -> CocktailSort(visualizer, numbers, range) }),
-    INSERTION({ visualizer, numbers, range -> InsertionSort(visualizer, numbers, range) }),
-    SELECTION({ visualizer, numbers, range -> SelectionSort(visualizer, numbers, range) }),
-    MERGE({ visualizer, numbers, range -> MergeSort(visualizer, numbers, range) }),
-    COMB({ visualizer, numbers, range -> CombSort(visualizer, numbers, range) }),
-    ODDEVEN({ visualizer, numbers, range -> OddEvenSort(visualizer, numbers, range) }),
-    BOGO({ visualizer, numbers, range -> BogoSort(visualizer, numbers, range) });
+enum class Algorithm(val fullName: String, val getter: (Visualizer, IntArray, IntRange) -> SortingAlgorithm) {
+    BUBBLE("Bubble", { visualizer, numbers, range -> BubbleSort(visualizer, numbers, range) }),
+    COCKTAIL("Cocktail Shaker", { visualizer, numbers, range -> CocktailSort(visualizer, numbers, range) }),
+    INSERTION("Insertion", { visualizer, numbers, range -> InsertionSort(visualizer, numbers, range) }),
+    SELECTION("Selection", { visualizer, numbers, range -> SelectionSort(visualizer, numbers, range) }),
+    MERGE("Merge", { visualizer, numbers, range -> MergeSort(visualizer, numbers, range) }),
+    COMB("Comb", { visualizer, numbers, range -> CombSort(visualizer, numbers, range) }),
+    ODDEVEN("Odd Even", { visualizer, numbers, range -> OddEvenSort(visualizer, numbers, range) }),
+    BOGO("Bogo", { visualizer, numbers, range -> BogoSort(visualizer, numbers, range) });
 
     operator fun invoke(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) =
         getter(visualizer, numbers, range)

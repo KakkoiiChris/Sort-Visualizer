@@ -4,12 +4,13 @@ import kakkoiichris.hypergame.view.Window
 
 fun main(args: Array<String>) {
     var algorithm = Algorithm.ODDEVEN
-    var count = 750
-    var width = 750
-    var height = width
+    var colored = true
+    var width = 1700
+    var height = width / 16 * 9
     var border = 10
+    var length = 1700
     var mode = Mode.SHUFFLE
-    var speed = 1.0 / 30
+    var speed = 1.0 / 100
 
     var i = 0
 
@@ -19,7 +20,7 @@ fun main(args: Array<String>) {
         when (arg.uppercase()) {
             "-A" -> algorithm = Algorithm.valueOf(args[i++].uppercase())
 
-            "-C" -> count = args[i++].toInt()
+            "-C"->colored=true
 
             "-D" -> {
                 val dimensions = args[i++].split(',').map { it.toInt() }
@@ -27,6 +28,8 @@ fun main(args: Array<String>) {
                 width = dimensions[0]
                 height = dimensions[1]
             }
+
+            "-L" -> length = args[i++].toInt()
 
             "-M" -> mode = Mode.valueOf(args[i++].uppercase())
 
@@ -36,7 +39,7 @@ fun main(args: Array<String>) {
 
     val window = Window<Visualizer>(width + (border * 2), height + (border * 2), title = "Sort Visualizer")
 
-    val visualizer = Visualizer(width, height, border, algorithm, count, mode, speed)
+    val visualizer = Visualizer(width, height, border, algorithm, length, mode, speed, colored)
 
     window.open(visualizer)
 }

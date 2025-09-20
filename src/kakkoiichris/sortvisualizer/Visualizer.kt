@@ -9,21 +9,29 @@ import kakkoiichris.hypergame.view.View
 import java.awt.Color
 import java.awt.Font
 import kotlin.math.ceil
+import kotlin.random.Random
 
 class Visualizer(
     val width: Int,
     val height: Int,
     val border: Int,
     val algorithm: Algorithm,
-    count: Int,
-    mode: Mode,
+    length: Int,
+    val shuffleMode: ShuffleMode,
     val speed: Double,
     val colored: Boolean
 ) : Game {
 
-    private val numbers = IntArray(count) { it + 1 }
+    private var state = State.START
 
-    private val sorter: SortingAlgorithm
+    private var waitTimer = 0.0
+
+    private var shuffleIndex = 0
+    private var shuffled = false
+
+    private val numbers = IntArray(length) { it + 1 }
+
+    private lateinit var sorter: SortingAlgorithm
 
     private var sortTimer = 0.0
 
@@ -35,23 +43,96 @@ class Visualizer(
     private var sortTime = 0.0
     private var visTime = 0.0
 
-    init {
-        when (mode) {
-            Mode.SHUFFLE -> numbers.shuffle()
-            Mode.REVERSE -> numbers.reverse()
-            Mode.SORTED  -> Unit
-        }
-
-        this.sorter = algorithm(this, numbers)
-    }
-
     override fun init(view: View<*>) {
     }
 
     override fun update(view: View<*>, time: Time, input: Input) {
+        when (state) {
+            State.START   -> updateStart(view, time, input)
+            State.SHUFFLE -> updateShuffle(view, time, input)
+            State.WAIT    -> updateWait(view, time, input)
+            State.SORT    -> updateSort(view, time, input)
+            State.RESULTS -> updateResults(view, time, input)
+        }
+    }
+
+    private fun updateStart(view: View<*>, time: Time, input: Input) {
+        waitTimer += time.seconds
+
+        if (waitTimer >= 2.0) {
+            waitTimer = 0.0
+            state = State.SHUFFLE
+        }
+    }
+
+    private fun updateShuffle(view: View<*>, time: Time, input: Input) {
+        sortTimer += time.seconds
+
+        if (sortTimer >= 0.001) {
+            sortTimer -= 0.001
+
+            when (shuffleMode) {
+                ShuffleMode.SHUFFLE -> {
+                    var j = shuffleIndex
+
+                    while (j == shuffleIndex) {
+                        j = Random.nextInt(numbers.size)
+                    }
+
+                    val t = numbers[shuffleIndex]
+                    numbers[shuffleIndex] = numbers[j]
+                    numbers[j] = t
+
+                    if (shuffleIndex == numbers.lastIndex) {
+                        waitTimer = 0.0
+                        state = State.WAIT
+                    }
+
+                    shuffleIndex++
+                }
+
+                ShuffleMode.REVERSE -> {
+                    val j = numbers.size - shuffleIndex - 1
+
+                    val t = numbers[shuffleIndex]
+                    numbers[shuffleIndex] = numbers[j]
+                    numbers[j] = t
+
+                    shuffleIndex++
+
+                    if (shuffleIndex >= j) {
+                        waitTimer = 0.0
+                        state = State.WAIT
+                    }
+                }
+
+                ShuffleMode.SORTED  -> {
+                    waitTimer = 0.0
+                    state = State.WAIT
+                }
+            }
+        }
+    }
+
+    private fun updateWait(view: View<*>, time: Time, input: Input) {
+        waitTimer += time.seconds
+
+        if (waitTimer >= 2.0) {
+            sorter = algorithm(this, numbers)
+
+            waitTimer = 0.0
+            sortTimer=0.0
+            state = State.SORT
+        }
+    }
+
+    private fun updateSort(view: View<*>, time: Time, input: Input) {
         if (sorter.numbers.isSorted) {
             swapA = -1
             swapB = -1
+
+            state = State.RESULTS
+
             return
         }
 
@@ -74,6 +155,8 @@ class Visualizer(
             }
         }
     }
+
+    private fun updateResults(view: View<*>, time: Time, input: Input) {}
 
     override fun render(view: View<*>, renderer: Renderer) {
         renderer.clearRect(view.bounds)
@@ -110,9 +193,9 @@ class Visualizer(
         renderer.color = Color.white
         renderer.font = Font("Consolas", Font.PLAIN, 20)
 
-        renderer.drawString("${algorithm.fullName} Sort", metricsBox, 0.0, 0.0)
-        renderer.drawString("Sort Time:   $sortTime", metricsBox, 0.0, 0.1)
-        renderer.drawString("Visual Time: $visTime", metricsBox, 0.0, 0.2)
+        renderer.drawString("${algorithm.fullName} Sort (${state.status})", metricsBox, 0.0, 0.0)
+        renderer.drawString("Sort Time:   ${String.format("%.5fs", sortTime)}", metricsBox, 0.0, 0.1)
+        renderer.drawString("Visual Time: ${String.format("%.5fs", visTime)}", metricsBox, 0.0, 0.2)
     }
 
     private fun getBarColor(i: Int, num: Int) = if (colored) {
@@ -138,5 +221,13 @@ class Visualizer(
         val temp = numbers[i]
         numbers[i] = numbers[j]
         numbers[j] = temp
+    }
+
+    private enum class State(val status:String) {
+        START("Starting Order"),
+        SHUFFLE("Shuffling..."),
+        WAIT("Shuffled Order"),
+        SORT("Sorting..."),
+        RESULTS("Done!")
     }
 }

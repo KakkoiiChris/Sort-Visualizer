@@ -1,6 +1,6 @@
 package kakkoiichris.sortvisualizer
 
-enum class Mode {
+enum class ShuffleMode {
     SHUFFLE,
     REVERSE,
     SORTED

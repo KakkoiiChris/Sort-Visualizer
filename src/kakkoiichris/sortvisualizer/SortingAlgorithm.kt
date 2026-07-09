@@ -1,5 +1,6 @@
 package kakkoiichris.sortvisualizer
 
+import kotlin.math.floor
 import kotlin.random.Random
 
 enum class Algorithm(val fullName: String, val getter: (Visualizer, IntArray, IntRange) -> SortingAlgorithm) {
@@ -10,6 +11,7 @@ enum class Algorithm(val fullName: String, val getter: (Visualizer, IntArray, In
     MERGE("Merge", { visualizer, numbers, range -> MergeSort(visualizer, numbers, range) }),
     COMB("Comb", { visualizer, numbers, range -> CombSort(visualizer, numbers, range) }),
     ODDEVEN("Odd Even", { visualizer, numbers, range -> OddEvenSort(visualizer, numbers, range) }),
+    MAX_HEAP("Max Heap Sort", { visualizer, numbers, range -> MaxHeapSort(visualizer, numbers, range) }),
     BOGO("Bogo", { visualizer, numbers, range -> BogoSort(visualizer, numbers, range) });
 
     operator fun invoke(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) =
@@ -379,35 +381,88 @@ class OddEvenSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = n
     }
 }
 
-/*class HeapSort(visualizer: Visualizer, numbers:IntArray, range: IntRange = numbers.indices) : SortingAlgorithm(visualizer, numbers, range) {
+class MaxHeapSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
+    SortingAlgorithm(visualizer, numbers, range) {
+    private var state = State.BUILD_HEAP
+
+    private var buildIndex = floor(numbers.size / 2.0).toInt()
+
+    private var end = numbers.lastIndex
+
+    private var sortIndex = end
+
     override val isSorted: Boolean
         get() = false
 
     override fun stepSort(callback: (Int, Int) -> Unit): Boolean {
+        return when (state) {
+            State.BUILD_HEAP -> updateBuildHeap(callback)
 
+            State.SORT       -> updateSort(callback)
+
+            State.DONE       -> true
+        }
     }
 
     private val Int.left get() = this * 2
     private val Int.right get() = (this * 2) + 1
-    private val Int.parent get() = (this - 1) / 2
 
-    private fun siftUp(end: Int): Int? {
-        if (end > 0) {
-            val parent = end.parent
+    private fun updateBuildHeap(callback: (Int, Int) -> Unit): Boolean {
+        heapify(buildIndex)
 
-            if (numbers[parent] < numbers[end]) {
-                val t = numbers[parent]
-                numbers[parent] = numbers[end]
-                numbers[end] = t
+        buildIndex--
 
-                end = parent
-            }
-            else return true
+        if (buildIndex < 0) {
+            state = State.SORT
         }
 
         return false
     }
-}*/
+
+    private fun heapify(i: Int) {
+        val left = i.left
+        val right = i.right
+
+        var max = if (left <= end && numbers[left] > numbers[i])
+            left
+        else i
+
+        if (right <= end && numbers[right] > numbers[max])
+            max = right
+
+        if (max != i) {
+            val temp = numbers[i]
+            numbers[i] = numbers[max]
+            numbers[max] = temp
+
+            heapify(max)
+        }
+    }
+
+    private fun updateSort(callback: (Int, Int) -> Unit): Boolean {
+        val temp = numbers[0]
+        numbers[0] = numbers[sortIndex]
+        numbers[sortIndex] = temp
+
+        end--
+
+        heapify(0)
+
+        sortIndex--
+
+        if (end == 0) {
+            state = State.DONE
+        }
+
+        return false
+    }
+
+    private enum class State {
+        BUILD_HEAP,
+        SORT,
+        DONE
+    }
+}
 
 class BogoSort(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) :
     SortingAlgorithm(visualizer, numbers, range) {

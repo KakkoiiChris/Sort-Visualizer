@@ -43,10 +43,10 @@ class Visualizer(
     private var sortTime = 0.0
     private var visTime = 0.0
 
-    override fun init(view: View<*>) {
+    override fun init(view: View) {
     }
 
-    override fun update(view: View<*>, time: Time, input: Input) {
+    override fun update(view: View, time: Time, input: Input) {
         when (state) {
             State.START   -> updateStart(view, time, input)
             State.SHUFFLE -> updateShuffle(view, time, input)
@@ -56,7 +56,7 @@ class Visualizer(
         }
     }
 
-    private fun updateStart(view: View<*>, time: Time, input: Input) {
+    private fun updateStart(view: View, time: Time, input: Input) {
         waitTimer += time.seconds
 
         if (waitTimer >= 2.0) {
@@ -65,14 +65,14 @@ class Visualizer(
         }
     }
 
-    private fun updateShuffle(view: View<*>, time: Time, input: Input) {
+    private fun updateShuffle(view: View, time: Time, input: Input) {
         sortTimer += time.seconds
 
         if (sortTimer >= 0.001) {
             sortTimer -= 0.001
 
             when (shuffleMode) {
-                ShuffleMode.SHUFFLE -> {
+                ShuffleMode.RANDOM -> {
                     var j = shuffleIndex
 
                     while (j == shuffleIndex) {
@@ -106,6 +106,21 @@ class Visualizer(
                     }
                 }
 
+                ShuffleMode.COMB    -> {
+                    val j = numbers.size - shuffleIndex - 1
+
+                    val t = numbers[shuffleIndex]
+                    numbers[shuffleIndex] = numbers[j]
+                    numbers[j] = t
+
+                    shuffleIndex += 2
+
+                    if (shuffleIndex >= j) {
+                        waitTimer = 0.0
+                        state = State.WAIT
+                    }
+                }
+
                 ShuffleMode.SORTED  -> {
                     waitTimer = 0.0
                     state = State.WAIT
@@ -114,19 +129,19 @@ class Visualizer(
         }
     }
 
-    private fun updateWait(view: View<*>, time: Time, input: Input) {
+    private fun updateWait(view: View, time: Time, input: Input) {
         waitTimer += time.seconds
 
         if (waitTimer >= 2.0) {
             sorter = algorithm(this, numbers)
 
             waitTimer = 0.0
-            sortTimer=0.0
+            sortTimer = 0.0
             state = State.SORT
         }
     }
 
-    private fun updateSort(view: View<*>, time: Time, input: Input) {
+    private fun updateSort(view: View, time: Time, input: Input) {
         if (sorter.numbers.isSorted) {
             swapA = -1
             swapB = -1
@@ -156,9 +171,9 @@ class Visualizer(
         }
     }
 
-    private fun updateResults(view: View<*>, time: Time, input: Input) {}
+    private fun updateResults(view: View, time: Time, input: Input) {}
 
-    override fun render(view: View<*>, renderer: Renderer) {
+    override fun render(view: View, renderer: Renderer) {
         renderer.clearRect(view.bounds)
 
         val barWidthDelta = width / numbers.size.toDouble()
@@ -214,7 +229,7 @@ class Visualizer(
         }
     }
 
-    override fun halt(view: View<*>) {
+    override fun halt(view: View) {
     }
 
     private fun swap(i: Int, j: Int) {
@@ -223,7 +238,7 @@ class Visualizer(
         numbers[j] = temp
     }
 
-    private enum class State(val status:String) {
+    private enum class State(val status: String) {
         START("Starting Order"),
         SHUFFLE("Shuffling..."),
         WAIT("Shuffled Order"),

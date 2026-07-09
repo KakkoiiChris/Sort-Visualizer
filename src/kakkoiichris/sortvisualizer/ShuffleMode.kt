@@ -1,7 +1,8 @@
 package kakkoiichris.sortvisualizer
 
 enum class ShuffleMode {
-    SHUFFLE,
+    RANDOM,
     REVERSE,
-    SORTED
+    COMB,
+    SORTED,
 }

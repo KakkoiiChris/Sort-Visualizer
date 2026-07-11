@@ -4,15 +4,15 @@ import kotlin.math.floor
 import kotlin.random.Random
 
 enum class Algorithm(val fullName: String, val getter: (Visualizer, IntArray, IntRange) -> SortingAlgorithm) {
-    BUBBLE("Bubble", { visualizer, numbers, range -> BubbleSort(visualizer, numbers, range) }),
-    COCKTAIL("Cocktail Shaker", { visualizer, numbers, range -> CocktailSort(visualizer, numbers, range) }),
-    INSERTION("Insertion", { visualizer, numbers, range -> InsertionSort(visualizer, numbers, range) }),
-    SELECTION("Selection", { visualizer, numbers, range -> SelectionSort(visualizer, numbers, range) }),
-    MERGE("Merge", { visualizer, numbers, range -> MergeSort(visualizer, numbers, range) }),
-    COMB("Comb", { visualizer, numbers, range -> CombSort(visualizer, numbers, range) }),
-    ODDEVEN("Odd Even", { visualizer, numbers, range -> OddEvenSort(visualizer, numbers, range) }),
-    MAX_HEAP("Max Heap Sort", { visualizer, numbers, range -> MaxHeapSort(visualizer, numbers, range) }),
-    BOGO("Bogo", { visualizer, numbers, range -> BogoSort(visualizer, numbers, range) });
+    BUBBLE   ("Bubble",          { visualizer, numbers, range -> BubbleSort   (visualizer, numbers, range) }),
+    COCKTAIL ("Cocktail Shaker", { visualizer, numbers, range -> CocktailSort (visualizer, numbers, range) }),
+    INSERTION("Insertion",       { visualizer, numbers, range -> InsertionSort(visualizer, numbers, range) }),
+    SELECTION("Selection",       { visualizer, numbers, range -> SelectionSort(visualizer, numbers, range) }),
+    MERGE    ("Merge",           { visualizer, numbers, range -> MergeSort    (visualizer, numbers, range) }),
+    COMB     ("Comb",            { visualizer, numbers, range -> CombSort     (visualizer, numbers, range) }),
+    ODD_EVEN ("Odd Even",        { visualizer, numbers, range -> OddEvenSort  (visualizer, numbers, range) }),
+    MAX_HEAP ("Max Heap",        { visualizer, numbers, range -> MaxHeapSort  (visualizer, numbers, range) }),
+    BOGO     ("Bogo",            { visualizer, numbers, range -> BogoSort     (visualizer, numbers, range) });
 
     operator fun invoke(visualizer: Visualizer, numbers: IntArray, range: IntRange = numbers.indices) =
         getter(visualizer, numbers, range)

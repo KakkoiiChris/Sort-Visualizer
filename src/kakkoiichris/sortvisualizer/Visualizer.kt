@@ -2,6 +2,7 @@ package kakkoiichris.sortvisualizer
 
 import kakkoiichris.hypergame.Game
 import kakkoiichris.hypergame.input.Input
+import kakkoiichris.hypergame.input.Key
 import kakkoiichris.hypergame.media.Renderer
 import kakkoiichris.hypergame.util.Time
 import kakkoiichris.hypergame.util.math.Box
@@ -19,7 +20,8 @@ class Visualizer(
     length: Int,
     val shuffleMode: ShuffleMode,
     val speed: Double,
-    val colored: Boolean
+    val colored: Boolean,
+    val immediate: Boolean
 ) : Game {
 
     private var state = State.START
@@ -68,11 +70,13 @@ class Visualizer(
     private fun updateShuffle(view: View, time: Time, input: Input) {
         sortTimer += time.seconds
 
-        if (sortTimer >= 0.001) {
-            sortTimer -= 0.001
+        while (sortTimer >= speed) {
+            if (shuffleIndex >= numbers.size) break
+
+            sortTimer -= speed
 
             when (shuffleMode) {
-                ShuffleMode.RANDOM -> {
+                ShuffleMode.RANDOM  -> {
                     var j = shuffleIndex
 
                     while (j == shuffleIndex) {
@@ -171,7 +175,25 @@ class Visualizer(
         }
     }
 
-    private fun updateResults(view: View, time: Time, input: Input) {}
+    private fun updateResults(view: View, time: Time, input: Input) {
+        if (input.keyDown(Key.SPACE)) {
+            if (immediate) {
+                view.close()
+
+                return
+            }
+
+            state = State.SHUFFLE
+            waitTimer = 0.0
+            shuffleIndex = 0
+            shuffled = false
+            sortTimer = 0.0
+            swapA = 0
+            swapB = 1
+            sortTime = 0.0
+            visTime = 0.0
+        }
+    }
 
     override fun render(view: View, renderer: Renderer) {
         renderer.clearRect(view.bounds)
@@ -208,23 +230,24 @@ class Visualizer(
         renderer.color = Color.white
         renderer.font = Font("Consolas", Font.PLAIN, 20)
 
-        renderer.drawString("${algorithm.fullName} Sort (${state.status})", metricsBox, 0.0, 0.0)
+        renderer.drawString("${algorithm.fullName} Sort: ${state.status}", metricsBox, 0.0, 0.0)
         renderer.drawString("Sort Time:   ${String.format("%.5fs", sortTime)}", metricsBox, 0.0, 0.1)
         renderer.drawString("Visual Time: ${String.format("%.5fs", visTime)}", metricsBox, 0.0, 0.2)
     }
 
     private fun getBarColor(i: Int, num: Int) = if (colored) {
         when (i) {
-            swapA, swapB -> Color.black
-            num - 1      -> Color(Color.HSBtoRGB((num - 1) / numbers.size.toFloat(), 1f, 1f))
-            else         -> Color(Color.HSBtoRGB((num - 1) / numbers.size.toFloat(), 1f, 0.6f))
+            swapA   -> Color.white
+            swapB   -> Color.gray
+            num - 1 -> Color(Color.HSBtoRGB((num - 1) / numbers.size.toFloat(), 1f, 1f))
+            else    -> Color(Color.HSBtoRGB((num - 1) / numbers.size.toFloat(), 1f, 0.6f))
         }
     }
     else {
         when (i) {
-            swapA   -> Color(127, 0, 0)
-            swapB   -> Color(0, 0, 127)
-            num - 1 -> Color(0, 127, 0)
+            swapA   -> Color(255, 0, 0)
+            swapB   -> Color(0, 0, 255)
+            num - 1 -> Color(0, 255, 0)
             else    -> Color(127, 127, 127)
         }
     }
@@ -243,6 +266,6 @@ class Visualizer(
         SHUFFLE("Shuffling..."),
         WAIT("Shuffled Order"),
         SORT("Sorting..."),
-        RESULTS("Done!")
+        RESULTS("Sorted Order")
     }
 }

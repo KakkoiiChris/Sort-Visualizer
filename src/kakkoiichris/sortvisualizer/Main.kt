@@ -4,14 +4,16 @@ import kakkoiichris.hypergame.view.Config
 import kakkoiichris.hypergame.view.Window
 
 fun main(args: Array<String>) {
-    var algorithm = Algorithm.MAX_HEAP
+    var algorithm = Algorithm.ODD_EVEN
     var border = 10
-    var colored = true
-    var width = 1000
+    var colored = false
+    var width = 1700
     var height = width / 16 * 9
-    var length = 800
-    var shuffleMode = ShuffleMode.SORTED
-    var speed = 1.0 / 100
+    var length = 80
+    var shuffleMode = ShuffleMode.RANDOM
+    var speed = 1.0 / 10
+
+    var immediate = false
 
     var i = 0
 
@@ -44,11 +46,13 @@ fun main(args: Array<String>) {
 
             'S' -> speed = args[i++].toDouble()
         }
+
+        immediate = true
     }
 
     val window = Window(Config(width + (border * 2), height + (border * 2), title = "Sort Visualizer"))
 
-    val visualizer = Visualizer(width, height, border, algorithm, length, shuffleMode, speed, colored)
+    val visualizer = Visualizer(width, height, border, algorithm, length, shuffleMode, speed, colored, immediate)
 
     window.open(visualizer)
 }
